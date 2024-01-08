@@ -1,12 +1,12 @@
 {
     "type": "code",
-    "modid": "CitadelFix",
+    "modid": "citadelfix",
     "name": "CitadelFix",
     "authors": [
         "Longboyy"
     ],
     "description": "Fixes to the reinforcement system",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "dependencies": {
         "game": "1.18.15"
     }

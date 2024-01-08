@@ -121,7 +121,7 @@ namespace CitadelFix
             foreach(var fix in fixes){
                 try{
                     var disposeMethod = fix.GetMethod("Dispose", BindingFlags.Public | BindingFlags.Static);
-                    disposeMethod.Invoke(null, new object[] {modSystem, api});
+                    disposeMethod.Invoke(null, null);
                 }catch(Exception err){
                     api.Logger.Error($"Error disposing fix: {fix.Name} : {err}");
                 }
