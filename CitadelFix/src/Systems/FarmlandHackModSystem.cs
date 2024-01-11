@@ -1,9 +1,7 @@
-using System;
 using System.Linq;
 using CitadelFix.Behaviours;
 using Vintagestory.API.Common;
 using Vintagestory.API.Server;
-using Vintagestory.Common;
 using Vintagestory.GameContent;
 
 namespace CitadelFix;

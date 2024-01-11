@@ -9,7 +9,7 @@ public class CitadelFixModSystem : ModSystem
 
     internal static CitadelFixModSystem modSystem;
     internal ICoreServerAPI sapi;
-    internal Harmony harmony;
+    internal Harmony harmony;    
 
     public override void StartPre(ICoreAPI api)
     {

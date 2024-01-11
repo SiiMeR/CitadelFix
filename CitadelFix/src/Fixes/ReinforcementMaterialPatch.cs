@@ -4,7 +4,6 @@ using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.GameContent;
 using Vintagestory.API.Util;
-using Vintagestory.API.Server;
 using System.Collections.Generic;
 
 namespace CitadelFix.Fixes;
@@ -79,7 +78,7 @@ public class ReinforcmentMaterialPatch
                     continue;
                 }
 
-                if(slot.Itemstack.Collectible.Code.ToString().EqualsFast(preferredMaterial)){
+                if(preferredMaterial != null && slot.Itemstack.Collectible.Code.ToString().EqualsFast(preferredMaterial)){
                     foundSlot = slot;
                     break;
                 }

@@ -1,7 +1,6 @@
 using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
 using Vintagestory.API.Server;
-using Vintagestory.Common;
 using Vintagestory.GameContent;
 
 namespace CitadelFix.Fixes;
