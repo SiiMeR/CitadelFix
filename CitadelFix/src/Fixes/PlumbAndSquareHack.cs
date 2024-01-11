@@ -4,28 +4,10 @@ using Vintagestory.API.Server;
 using Vintagestory.Common;
 using Vintagestory.GameContent;
 
-namespace CitadelFix.Hacks;
+namespace CitadelFix.Fixes;
 
-public class PlumbAndSquareFix : CitadelFixThing
+public class PlumbAndSquareHack
 {
-    public static EnumAppSide Side => EnumAppSide.Server;
-
-    public static ModRunPhase RunPhase => ModRunPhase.Start;
-
-    private static ICoreServerAPI sapi;
-
-    public static void Apply(CitadelFixModSystem modSystem, ICoreAPI api)
-    {
-        sapi = api as ICoreServerAPI;
-        sapi.Event.DidBreakBlock += HandleBlockBreak;
-        sapi.Event.DidPlaceBlock += HandleBlockPlace;
-    }
-
-    public static void Dispose()
-    {
-        sapi.Event.DidBreakBlock -= HandleBlockBreak;
-        sapi.Event.DidPlaceBlock -= HandleBlockPlace;
-    }
 
     public static void HandleBlockBreak(IServerPlayer byPlayer, int oldBlockId, BlockSelection selection)
     {

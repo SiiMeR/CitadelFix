@@ -4,14 +4,16 @@ using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.GameContent;
 using Vintagestory.API.Util;
+using Vintagestory.API.Server;
+using System.Collections.Generic;
 
-namespace CitadelFix.Patches;
+namespace CitadelFix.Fixes;
 
 [HarmonyPatch]
 public class ReinforcmentMaterialPatch
 {
 
-        private static ItemSlot getPreferredReinforcementSlot(ItemSlot slotA, ItemSlot slotB){
+    private static ItemSlot getPreferredReinforcementSlot(ItemSlot slotA, ItemSlot slotB){
         if (slotA == null){
             return slotB;
         }
@@ -59,6 +61,9 @@ public class ReinforcmentMaterialPatch
     public static bool FindResourceForReinforcing(ModSystemBlockReinforcement __instance, IPlayer byPlayer, ref ItemSlot __result)
     {
         ItemSlot foundSlot = null;
+        var sapi = CitadelFixModSystem.modSystem.sapi;
+        var data = sapi.PlayerData.GetPlayerDataByUid(byPlayer.PlayerUID);
+        var preferredMaterial = data.CustomPlayerData.GetValueOrDefault("CitadelFixPreferredMaterial", null);
 
         foreach (var inv in byPlayer.InventoryManager.Inventories.Select(p => p.Value).ToList())
         {
@@ -68,9 +73,15 @@ public class ReinforcmentMaterialPatch
                 if (slot == null ||
                 slot.Empty ||
                 slot.Itemstack.ItemAttributes == null ||
+                slot.Itemstack.ItemAttributes["reinforcementStrength"].AsInt(0) == 0 ||
                 slot is ItemSlotCreative || !(slot.Inventory is InventoryBasePlayer))
                 {
                     continue;
+                }
+
+                if(slot.Itemstack.Collectible.Code.ToString().EqualsFast(preferredMaterial)){
+                    foundSlot = slot;
+                    break;
                 }
 
                 ItemSlot newSlot = getPreferredReinforcementSlot(slot, foundSlot);
