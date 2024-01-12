@@ -1,10 +1,7 @@
 using System.Text;
 using Vintagestory.API.Common;
-using Vintagestory.API.Common.Entities;
 using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
-using Vintagestory.API.Server;
-using Vintagestory.Common;
 using Vintagestory.GameContent;
 
 namespace CitadelFix.Behaviours;
@@ -22,20 +19,17 @@ public class CropBlockBehaviourReinforcable : BlockBehavior
             base.OnBlockBroken(world, pos, byPlayer, ref handling);
             return;
         }
-        //world.Api.Logger.Notification($"OnBlockBroken: {pos} by {byPlayer.PlayerUID}");
         ModSystemBlockReinforcement modSystem = world.Api.ModLoader.GetModSystem<ModSystemBlockReinforcement>();
         var farmlandPos = pos.DownCopy();
         BlockReinforcement reinforcment = modSystem.GetReinforcment(farmlandPos);
         if (reinforcment == null || reinforcment.Strength <= 0)
         {
             base.OnBlockBroken(world, pos, byPlayer, ref handling);
-            //world.Api.Logger.Notification($"OnBlockBroken: {pos} by {byPlayer.PlayerUID} - Reinforcement not found");
             return;
         }
         world.PlaySoundAt(new AssetLocation("sounds/tool/breakreinforced"), farmlandPos.X, farmlandPos.Y, farmlandPos.Z, byPlayer);
         if (byPlayer.HasPrivilege("denybreakreinforced"))
         {
-            //world.Api.Logger.Notification($"OnBlockBroken: {pos} by {byPlayer.PlayerUID} - denybreakreinforced");
             base.OnBlockBroken(world, pos, byPlayer, ref handling);
             return;
         }
@@ -43,7 +37,6 @@ public class CropBlockBehaviourReinforcable : BlockBehavior
         modSystem.ConsumeStrength(farmlandPos, 1);
         world.BlockAccessor.MarkBlockDirty(farmlandPos);
         world.BlockAccessor.MarkBlockDirty(pos);
-        //world.Api.Logger.Notification($"OnBlockBroken: {pos} by {byPlayer.PlayerUID} - Reinforcement consumed");
     }
 
     public override void OnBlockExploded(IWorldAccessor world, BlockPos pos, BlockPos explosionCenter, EnumBlastType blastType, ref EnumHandling handling)
@@ -53,7 +46,6 @@ public class CropBlockBehaviourReinforcable : BlockBehavior
         BlockReinforcement reinforcment = modSystem.GetReinforcment(farmlandPos);
         if (reinforcment != null && reinforcment.Strength > 0)
         {
-            //modSystem.ConsumeStrength(farmlandPos, 2);
             world.BlockAccessor.MarkBlockDirty(farmlandPos);
             world.BlockAccessor.MarkBlockDirty(pos);
             handling = EnumHandling.PreventDefault;

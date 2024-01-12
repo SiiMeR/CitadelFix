@@ -1,4 +1,7 @@
-﻿using CitadelFix.Fixes;
+﻿using System.Linq;
+using System.Reflection;
+using System.Text;
+using CitadelFix.Fixes;
 using HarmonyLib;
 using Vintagestory.API.Common;
 using Vintagestory.API.Server;
@@ -8,12 +11,14 @@ public class CitadelFixModSystem : ModSystem
 {
 
     internal static CitadelFixModSystem modSystem;
-    internal ICoreServerAPI sapi;
-    internal Harmony harmony;    
+    internal static ICoreServerAPI sapi;
+    internal static ICoreAPI api;
+    internal Harmony harmony;
 
     public override void StartPre(ICoreAPI api)
     {
         base.StartPre(api);
+        CitadelFixModSystem.api = api;
         this.ApplyHarmonyPatches();
     }
 
@@ -29,8 +34,10 @@ public class CitadelFixModSystem : ModSystem
     public override void Dispose()
     {
         base.Dispose();
+        harmony?.UnpatchAll();
+        harmony = null;
 
-        if(sapi == null) return;
+        if (sapi == null) return;
         sapi.Event.DidBreakBlock -= PlumbAndSquareHack.HandleBlockBreak;
         sapi.Event.DidPlaceBlock -= PlumbAndSquareHack.HandleBlockPlace;
     }
@@ -40,9 +47,21 @@ public class CitadelFixModSystem : ModSystem
         return true;
     }
 
-    private void ApplyHarmonyPatches(){
-        harmony = new Harmony("CitadelFix.Patches");
-        harmony.PatchAll();
+    private void ApplyHarmonyPatches()
+    {
+        if(harmony != null){
+            return;
+        }
+        harmony = new Harmony($"CitadelFix.Patches");
+        harmony.PatchAll(Assembly.GetExecutingAssembly());
+        var builder = new StringBuilder();
+        var patchedMethods = harmony.GetPatchedMethods();
+        builder.Append($"Applied {patchedMethods.Count()} patches for {api.Side} side:\n");
+        foreach(var patchedMethod in patchedMethods){
+            builder.Append($"    {patchedMethod}\n");
+        }
+        builder.Remove(builder.Length-1, 1);
+        api.Logger.Notification(builder.ToString());
     }
 
 }

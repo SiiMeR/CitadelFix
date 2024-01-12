@@ -32,7 +32,7 @@ public class FarmlandHackModSystem : ModSystem
         {
             if (!(block.Code == null) && block.Id != 0 && IsCrop(block))
             {
-                api.Logger.Notification($"Adding Crop Reinforcement to {block.Code}[{block.Id}]");
+                //api.Logger.Notification($"Adding Crop Reinforcement to {block.Code}[{block.Id}]");
                 block.BlockBehaviors = block.BlockBehaviors.Append(new CropBlockBehaviourReinforcable(block)).ToArray();
             }
         }

@@ -60,7 +60,7 @@ public class ReinforcmentMaterialPatch
     public static bool FindResourceForReinforcing(ModSystemBlockReinforcement __instance, IPlayer byPlayer, ref ItemSlot __result)
     {
         ItemSlot foundSlot = null;
-        var sapi = CitadelFixModSystem.modSystem.sapi;
+        var sapi = CitadelFixModSystem.sapi;
         var data = sapi.PlayerData.GetPlayerDataByUid(byPlayer.PlayerUID);
         var preferredMaterial = data.CustomPlayerData.GetValueOrDefault("CitadelFixPreferredMaterial", null);
 
