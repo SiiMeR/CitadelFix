@@ -5,6 +5,7 @@ using System.Reflection;
 using HarmonyLib;
 using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
+using Vintagestory.API.Util;
 using Vintagestory.GameContent;
 
 namespace CitadelFix.Fixes;
@@ -18,20 +19,34 @@ public class GroupLockPatch
     [HarmonyPatch(typeof(ModSystemBlockReinforcement), "TryLock")]
     public static bool TryLock(ModSystemBlockReinforcement __instance, BlockPos pos, IPlayer byPlayer, string itemCode, ref bool __result)
     {
-        Dictionary<int, BlockReinforcement> reinforcmentsAt = getOrCreateReinforcementsAt(__instance, pos);
+        var accessor = ReinforcementSystemAccessor.With(__instance);
+        Dictionary<int, BlockReinforcement> reinforcmentsAt = accessor.GetOrCreateReinforcementsAt(pos);
         if (reinforcmentsAt == null)
             return false;
-        int localIndex = toLocalIndex(__instance, pos);
+        int localIndex = accessor.ToLocalIndex(pos);
         BlockReinforcement blockReinforcement;
         if (reinforcmentsAt.TryGetValue(localIndex, out blockReinforcement))
         {
-            if (!(byPlayer.GetGroups().Where(g => g.GroupUid == blockReinforcement.GroupUid).Count() > 0) || blockReinforcement.Locked){
+            if(blockReinforcement.Locked){
+                __result = false;
                 return false;
             }
+
+            //CitadelFixModSystem.api.Logger.Notification($"Block PlayerUID: {blockReinforcement.PlayerUID} | Block GroupUID: {blockReinforcement.GroupUid} | Real PlayerUID: {byPlayer.PlayerUID}");
+            //CitadelFixModSystem.api.Logger.Notification($"Reinforcement players equal: {byPlayer.PlayerUID.EqualsFast(blockReinforcement.PlayerUID)}");
+            if(blockReinforcement.PlayerUID != null && !blockReinforcement.PlayerUID.EqualsFast(byPlayer.PlayerUID)){
+                __result = false;
+                return false;
+            }else if(blockReinforcement.GroupUid != 0 && !(byPlayer.GetGroups().Where(g => g.GroupUid == blockReinforcement.GroupUid).Count() > 0)){
+                __result = false;
+                return false;
+            }
+
             blockReinforcement.Locked = true;
             blockReinforcement.LockedByItemCode = itemCode;
-            saveReinforcements(__instance, reinforcmentsAt, pos);
-            return true;
+            accessor.SaveReinforcements(reinforcmentsAt, pos);
+            __result = true;
+            return false;
         }
         reinforcmentsAt[localIndex] = new BlockReinforcement()
         {
@@ -41,33 +56,7 @@ public class GroupLockPatch
             Locked = true,
             LockedByItemCode = itemCode
         };
-        saveReinforcements(__instance, reinforcmentsAt, pos);
+        accessor.SaveReinforcements(reinforcmentsAt, pos);
         return true;
     }
-
-    public static Dictionary<int, BlockReinforcement> getOrCreateReinforcementsAt(ModSystemBlockReinforcement _instance, BlockPos pos)
-    {
-        return _instance.GetType().GetMethod("getOrCreateReinforcmentsAt",
-            BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.InvokeMethod
-        ).Invoke(_instance, new object[] { pos }) as Dictionary<int, BlockReinforcement>;
-    }
-
-    public static int toLocalIndex(ModSystemBlockReinforcement _instance, BlockPos pos)
-    {
-        return (int)_instance.GetType().GetMethod("toLocalIndex", 
-            BindingFlags.NonPublic | BindingFlags.Instance, 
-            null, 
-            new Type[] { typeof(BlockPos) }, 
-            null
-        ).Invoke(_instance, new object[]{pos});
-    }
-
-    public static void saveReinforcements(ModSystemBlockReinforcement _instance, Dictionary<int, BlockReinforcement> reif, BlockPos pos)
-    {
-        _instance.GetType().GetMethod("saveReinforcments",
-            BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.InvokeMethod
-        ).Invoke(_instance, new object[] { reif, pos });
-    }
-
-
 }
