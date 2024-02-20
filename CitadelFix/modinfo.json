@@ -6,8 +6,8 @@
         "Longboyy"
     ],
     "description": "Fixes to the reinforcement system",
-    "version": "1.0.7",
+    "version": "1.0.9",
     "dependencies": {
-        "game": "1.18.15"
+        "game": "1.19.2"
     }
 }

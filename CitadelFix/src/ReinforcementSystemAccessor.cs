@@ -49,7 +49,7 @@ public class ReinforcementSystemAccessor
 
     public static void saveReinforcements(ModSystemBlockReinforcement _instance, Dictionary<int, BlockReinforcement> reif, BlockPos pos)
     {
-        _instance.GetType().GetMethod("saveReinforcments",
+        _instance.GetType().GetMethod("SaveReinforcments",
             BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.InvokeMethod
         ).Invoke(_instance, new object[] { reif, pos });
     }
