@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Text;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
@@ -21,12 +22,23 @@ public class CropBlockBehaviourReinforcable : BlockBehavior
         }
         ModSystemBlockReinforcement modSystem = world.Api.ModLoader.GetModSystem<ModSystemBlockReinforcement>();
         var farmlandPos = pos.DownCopy();
-        BlockReinforcement reinforcment = modSystem.GetReinforcment(farmlandPos);
-        if (reinforcment == null || reinforcment.Strength <= 0)
+        BlockReinforcement reinforcement = modSystem.GetReinforcment(farmlandPos);
+        if (reinforcement == null)
         {
             base.OnBlockBroken(world, pos, byPlayer, ref handling);
             return;
         }
+        
+        var isBrokenByPlayer = byPlayer.PlayerUID == reinforcement.PlayerUID;
+        var isBrokenByPlayerInGroup = reinforcement.GroupUid != 0 &&
+                                      byPlayer.GetGroups().Any(g => g.GroupUid == reinforcement.GroupUid);
+
+        if (reinforcement.Strength <= 0 || isBrokenByPlayer || isBrokenByPlayerInGroup)
+        {
+            base.OnBlockBroken(world, pos, byPlayer, ref handling);
+            return;
+        }
+        
         world.PlaySoundAt(new AssetLocation("sounds/tool/breakreinforced"), farmlandPos.X, farmlandPos.Y, farmlandPos.Z, byPlayer);
         if (byPlayer.HasPrivilege("denybreakreinforced"))
         {

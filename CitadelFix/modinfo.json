@@ -9,5 +9,7 @@
     "version": "1.0.9",
     "dependencies": {
         "game": "1.19.2"
-    }
+    },
+    "RequiredOnServer": true,
+    "RequiredOnClient": false
 }
