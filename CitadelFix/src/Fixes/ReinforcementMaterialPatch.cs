@@ -1,10 +1,11 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
-using Vintagestory.GameContent;
 using Vintagestory.API.Util;
-using System.Collections.Generic;
+using Vintagestory.GameContent;
 
 namespace CitadelFix.Fixes;
 
@@ -66,28 +67,36 @@ public class ReinforcmentMaterialPatch
 
         foreach (var inv in byPlayer.InventoryManager.Inventories.Select(p => p.Value).ToList())
         {
-            for (int i = 0; i < inv.Count; i++)
+            try
             {
-                var slot = inv[i];
-                if (slot == null ||
-                slot.Empty ||
-                slot.Itemstack.ItemAttributes == null ||
-                slot.Itemstack.ItemAttributes["reinforcementStrength"].AsInt(0) == 0 ||
-                slot is ItemSlotCreative || !(slot.Inventory is InventoryBasePlayer))
+                for (int i = 0; i < inv.Count; i++)
                 {
-                    continue;
-                }
+                    var slot = inv[i];
+                    if (slot == null ||
+                        slot.Empty ||
+                        slot.Itemstack.ItemAttributes == null ||
+                        slot.Itemstack.ItemAttributes["reinforcementStrength"].AsInt(0) == 0 ||
+                        slot is ItemSlotCreative || !(slot.Inventory is InventoryBasePlayer))
+                    {
+                        continue;
+                    }
 
-                if(preferredMaterial != null && slot.Itemstack.Collectible.Code.ToString().EqualsFast(preferredMaterial)){
-                    foundSlot = slot;
-                    break;
-                }
+                    if(preferredMaterial != null && slot.Itemstack.Collectible.Code.ToString().EqualsFast(preferredMaterial)){
+                        foundSlot = slot;
+                        break;
+                    }
 
-                ItemSlot newSlot = getPreferredReinforcementSlot(slot, foundSlot);
-                if(newSlot != null && !newSlot.Equals(foundSlot)){
-                    foundSlot = newSlot;
+                    ItemSlot newSlot = getPreferredReinforcementSlot(slot, foundSlot);
+                    if(newSlot != null && !newSlot.Equals(foundSlot)){
+                        foundSlot = newSlot;
+                    }
                 }
             }
+            catch (Exception e)
+            {
+                sapi.Logger.Debug($"Not able to find material for reinforcing in {inv.InventoryID}");
+            }
+
         }
 
         __result = foundSlot;
